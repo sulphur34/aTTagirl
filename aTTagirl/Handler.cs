@@ -17,11 +17,12 @@ namespace aTTagirl
 {
     class Handler
     {
-        public static bool excuse;
+        public static bool excuse, swicher;
         public static string excusestring;
         public static int scoretype;
         public static CallbackQuery callbackQueryMain;
         public static int callbackQueryMessageToDelete;
+        public static List<int> messageIDstring = new List<int>();
 
         public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
@@ -50,7 +51,7 @@ namespace aTTagirl
             {
                 await handler;
             }
-            catch (Exception exception)
+             catch (Exception exception)
             {
                 await HandleErrorAsync(botClient, exception, cancellationToken);
             }
@@ -71,6 +72,7 @@ namespace aTTagirl
             else if (excuse)
             {
                await GameWithExcuse(botClient, message);
+                return;
             }
 
 
@@ -95,72 +97,73 @@ namespace aTTagirl
                 return await BotOnRewardReceived(botClient, callbackQueryMain, scoretype);
             }
 
-            //static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message)
-            //{
-            //    ReplyKeyboardMarkup replyKeyboardMarkup = new(
-            //        new[]
-            //        {
-            //            new KeyboardButton[] { "1.1", "1.2" },
-            //            new KeyboardButton[] { "2.1", "2.2" },
-            //        })
-            //    {
-            //        ResizeKeyboard = true
-            //    };
-
-            //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-            //                                                text: "Choose",
-            //                                                replyMarkup: replyKeyboardMarkup);
-            //}
-
-            //static async Task<Message> RemoveKeyboard(ITelegramBotClient botClient, Message message)
-            //{
-            //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-            //                                                text: "Removing keyboard",
-            //                                                replyMarkup: new ReplyKeyboardRemove());
-            //}
-
-            //static async Task<Message> SendFile(ITelegramBotClient botClient, Message message)
-            //{
-            //    await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.UploadPhoto);
-
-            //    const string filePath = @"Files/tux.png";
-            //    using FileStream fileStream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            //    var fileName = filePath.Split(Path.DirectorySeparatorChar).Last();
-
-            //    return await botClient.SendPhotoAsync(chatId: message.Chat.Id,
-            //                                          photo: new InputOnlineFile(fileStream, fileName),
-            //                                          caption: "Nice Picture");
-            //}
-
-            //static async Task<Message> RequestContactAndLocation(ITelegramBotClient botClient, Message message)
-            //{
-            //    ReplyKeyboardMarkup RequestReplyKeyboard = new(
-            //        new[]
-            //        {
-            //        KeyboardButton.WithRequestLocation("Location"),
-            //        KeyboardButton.WithRequestContact("Contact"),
-            //        });
-
-            //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-            //                                                text: "Who or Where are you?",
-            //                                                replyMarkup: RequestReplyKeyboard);
-            //}
-
             static async Task<Message> Usage(ITelegramBotClient botClient, Message message)
             {
                 await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
                 const string usage = "Usage:\n" +
                                      "/start   - запустить бота\n" +
                                      "Набери любое сообщение с описанием того что ты сегодня сделала чтобы получить награду";
-                                     //"/remove   - remove custom keyboard\n" +
-                                     //"/photo    - send a photo\n" +
-                                     //"/request  - request location or contact";
+                //"/remove   - remove custom keyboard\n" +
+                //"/photo    - send a photo\n" +
+                //"/request  - request location or contact";
                 Message messageone = await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                             text: usage,
                                                             replyMarkup: new ReplyKeyboardRemove());
-                return messageone;                
+                return messageone;
             }
         }
+        //static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message)
+        //{
+        //    ReplyKeyboardMarkup replyKeyboardMarkup = new(
+        //        new[]
+        //        {
+        //            new KeyboardButton[] { "1.1", "1.2" },
+        //            new KeyboardButton[] { "2.1", "2.2" },
+        //        })
+        //    {
+        //        ResizeKeyboard = true
+        //    };
+
+        //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
+        //                                                text: "Choose",
+        //                                                replyMarkup: replyKeyboardMarkup);
+        //}
+
+        //static async Task<Message> RemoveKeyboard(ITelegramBotClient botClient, Message message)
+        //{
+        //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
+        //                                                text: "Removing keyboard",
+        //                                                replyMarkup: new ReplyKeyboardRemove());
+        //}
+
+        //static async Task<Message> SendFile(ITelegramBotClient botClient, Message message)
+        //{
+        //    await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.UploadPhoto);
+
+        //    const string filePath = @"Files/tux.png";
+        //    using FileStream fileStream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        //    var fileName = filePath.Split(Path.DirectorySeparatorChar).Last();
+
+        //    return await botClient.SendPhotoAsync(chatId: message.Chat.Id,
+        //                                          photo: new InputOnlineFile(fileStream, fileName),
+        //                                          caption: "Nice Picture");
+        //}
+
+        //static async Task<Message> RequestContactAndLocation(ITelegramBotClient botClient, Message message)
+        //{
+        //    ReplyKeyboardMarkup RequestReplyKeyboard = new(
+        //        new[]
+        //        {
+        //        KeyboardButton.WithRequestLocation("Location"),
+        //        KeyboardButton.WithRequestContact("Contact"),
+        //        });
+
+        //    return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
+        //                                                text: "Who or Where are you?",
+        //                                                replyMarkup: RequestReplyKeyboard);
+        //}
+
+
 
         // Process Inline Keyboard callback data
         private static async Task BotOnCallbackQueryReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
@@ -186,6 +189,11 @@ namespace aTTagirl
                 "Medal3" => BotAskForExcuse(botClient, callbackQuery, 6),
                 "ExcuseYes" => BotWaitForexcuse(botClient, callbackQuery, scoretype),
                 "ExcuseNo" => BotOnRewardReceived(botClient,callbackQuery, scoretype),
+                "AskClear" => BotOnDeleteRecieved(botClient, callbackQuery),
+                "ClearPlayer" => BotOnDeletePlayer(botClient, callbackQuery),
+                "StatAll" => BotOverallStat(botClient, callbackQuery),
+                "StatExcuse" => BotStatWithExcuses(botClient, callbackQuery),
+                "BackWithDelete" => BotDeleteStatRow(botClient, callbackQuery),
                 _ => MainMenu(botClient, callbackQuery.Message),
 
                 //_ => await botClient.AnswerCallbackQueryAsync(callbackQueryId: callbackQuery.Id, text: $"Received {callbackQuery.Data}")
@@ -194,6 +202,55 @@ namespace aTTagirl
             //await botClient.SendTextMessageAsync(
             //    chatId: callbackQuery.Message.Chat.Id,
             //    text: $"Received {callbackQuery.Data}");
+        }
+
+        private static async Task<Message> BotOnDeletePlayer(ITelegramBotClient botClient, CallbackQuery callbackQuery)
+        {
+            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            List<Score> scores = await Program.ScoreStat.GetScoresList();
+            foreach (Score score in scores)
+            {
+                if (score.PlayerID == callbackQuery.From.Id)
+                { 
+                    await Program.ScoreStat.DeleteScoreAsync(score);
+                }
+            }
+            InlineKeyboardMarkup inlineKeyboard = new(
+                new[]
+                {                    
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back"),
+                    },
+                });
+
+            return await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id,
+                                                        text: "Я замел все следы🥷🏿",
+                                                        replyMarkup: inlineKeyboard);
+        }
+
+        private static async Task<Message> BotOnDeleteRecieved(ITelegramBotClient botClient, CallbackQuery callbackQuery)
+        {
+            //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+
+            // Simulate longer running task
+            await Task.Delay(500);
+
+            InlineKeyboardMarkup inlineKeyboard = new(
+                new[]
+                {
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Да", callbackData: "ClearPlayer"),
+                        InlineKeyboardButton.WithCallbackData(text: "Нет", callbackData: "Setup"),
+                    },                    
+                });
+            return await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id,
+                                                        text: "Точно удаляем",
+                                                        replyMarkup: inlineKeyboard);           
         }
 
         private static async Task BotOnInlineQueryReceived(ITelegramBotClient botClient, InlineQuery inlineQuery)
@@ -228,13 +285,19 @@ namespace aTTagirl
             Console.WriteLine($"Unknown update type: {update.Type}");
             return Task.CompletedTask;
         }
-        // Send inline keyboard
-        // You can process responses in BotOnCallbackQueryReceived handler
+              
         static async Task<Message> MainMenu(ITelegramBotClient botClient, Message message)
         {
-            //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
-            await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            if (message.MessageId == callbackQueryMessageToDelete)
+            { 
+                callbackQueryMessageToDelete = 0;
+            }
+            else
+            {
+                await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);                
+            }
 
+            //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
             // Simulate longer running task
             await Task.Delay(500);
 
@@ -274,6 +337,7 @@ namespace aTTagirl
                                                         replyMarkup: inlineKeyboard);
 
         }
+
         private static async Task<Message> BotOnRouletteReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
 
@@ -306,6 +370,7 @@ namespace aTTagirl
                                                         text: $"||Сегодня ты \n {attName}||", parseMode: ParseMode.MarkdownV2,
                                                         replyMarkup: inlineKeyboard);
         }
+
         private static async Task<Message> BotOnInfoReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
             //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
@@ -328,13 +393,84 @@ namespace aTTagirl
                                                         text: "<b>bold <i>italic bold <s>italic bold strikethrough</s> <u>underline italic bold</u></i> bold</b>", parseMode: ParseMode.Html,
                                                         replyMarkup: inlineKeyboard);
         }
+
         private static async Task<Message> BotOnStatReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
             //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
             await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
             // Simulate longer running task
+            await Task.Delay(500);           
+
+            InlineKeyboardMarkup inlineKeyboard = new(
+                new[]
+                {                    
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Общую статистику", callbackData: "StatAll"),
+                    },
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Что я там понаписала", callbackData: "StatExcuse"),
+                    },
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back"),
+                    },
+                });
+
+            return await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id,
+                                                        text: "Чего изволите",
+                                                        replyMarkup: inlineKeyboard);
+        }
+        private static async Task<Message> BotStatWithExcuses(ITelegramBotClient botClient, CallbackQuery callbackQuery)
+        {
+            //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            // Simulate longer running task
+            await Task.Delay(500);            
+            List<Score> scores = await Program.ScoreStat.GetScoresList();
+            string tempString;
+            Message MessageOne;
+                foreach (Score score in scores)
+                {
+                if (score.ScoreReasonManual && score.PlayerID == callbackQuery.From.Id)
+                {
+                    tempString = score.DateRecieved.ToString() + " ты " + score.ScoreName.ToString() + "Ты написала\n" + score.ScoreReason.ToString();
+                    MessageOne = await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id, text: tempString);
+                    messageIDstring.Add(MessageOne.MessageId);
+                }
+                }
+            InlineKeyboardMarkup inlineKeyboard = new(
+                new[]
+                {                    
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "BackWithDelete"),
+                    },
+                });
+            return await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id, text: "Возвращаемся?", replyMarkup: inlineKeyboard);
+        }
+        private static async Task<Message> BotDeleteStatRow(ITelegramBotClient botClient, CallbackQuery callbackQuery)
+        {
+            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            foreach (int msgid in messageIDstring)
+            {
+                await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, msgid);
+            }
+            messageIDstring.Clear();
+            callbackQueryMessageToDelete = callbackQuery.Message.MessageId;
+            swicher = true;
+            return await MainMenu(botClient, callbackQuery.Message);
+        }
+        private static async Task<Message> BotOverallStat(ITelegramBotClient botClient, CallbackQuery callbackQuery)
+        {
+            //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            // Simulate longer running task
             await Task.Delay(500);
-            string statistics = "Your statistic";
+            string statistics = "Все что нажито непосильным трудом:";
             int count;
             string scoreName = "";
             Console.WriteLine("/nDone");
@@ -343,7 +479,7 @@ namespace aTTagirl
             {
                 count = 0;
                 foreach (Score score in scores)
-                {                   
+                {
                     if (score.ScoreType == i && score.PlayerID == callbackQuery.From.Id)
                     {
                         scoreName = score.ScoreName;
@@ -372,6 +508,7 @@ namespace aTTagirl
                                                         text: statistics,
                                                         replyMarkup: inlineKeyboard);
         }
+
         private static async Task<Message> BotAskForExcuse(ITelegramBotClient botClient, CallbackQuery callbackQuery, int Attatype)
         {            
             scoretype = Attatype;
@@ -393,6 +530,7 @@ namespace aTTagirl
                                                         text: "Расскажешь за что хвалить?",
                                                         replyMarkup: inlineKeyboard);
         }
+
         private static async Task<Message> BotWaitForexcuse(ITelegramBotClient botClient, CallbackQuery callbackQuery, int Attatype)
         {
             excuse = true;
@@ -413,20 +551,29 @@ namespace aTTagirl
             Message message1 = null;            
             return message1;
         }
+
         private static async Task<Message> BotOnRewardReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery, int Attatype)
         {
             //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
-            await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            if (excuse != true)
+            {
+                await botClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            }
+            else
+            {
+                
+            }
+            
             // Simulate longer running task
             await Task.Delay(500);
             if (excuse)
             {
                 Games.GameNewRound(playerID: callbackQuery.From.Id, attNumber: Attatype, excusestring, excuse);
+                excuse = false;
             }
             else
             {
-                Games.GameNewRound(playerID: callbackQuery.From.Id, attNumber: Attatype, $"Награда от бота {DateTime.Now}", excuse);
-                excuse = false;                
+                Games.GameNewRound(playerID: callbackQuery.From.Id, attNumber: Attatype, $"Награда от бота {DateTime.Now}", excuse);                               
             }
 
             InlineKeyboardMarkup inlineKeyboard = new(
@@ -438,12 +585,21 @@ namespace aTTagirl
                         InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back"),
                     },
                 });
+            string finalstring;
+            if (Attatype < 4)
+            {
+                finalstring = "Ты сегодня";
+            }
+            else
+            {
+                finalstring = "Вот твоя медалька";
+            }
 
             return await botClient.SendTextMessageAsync(chatId: callbackQuery.Message.Chat.Id,
-                                                        text: $"||И ты получаешь \n {Games.AttaSwitch(Attatype)}||", parseMode: ParseMode.MarkdownV2,
+                                                        text: $"||{finalstring} \n {Games.AttaSwitch(Attatype)}||", parseMode: ParseMode.MarkdownV2,
                                                         replyMarkup: inlineKeyboard);
-
         }
+
         private static async Task<Message> BotOnWisdomReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
             //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
@@ -466,6 +622,7 @@ namespace aTTagirl
                                                         text: "Непередаваемый\nполезный\nи мудрый\nохуительный совет",
                                                         replyMarkup: inlineKeyboard);
         }
+
         private static async Task<Message> BotOnSetupReceived(ITelegramBotClient botClient, CallbackQuery callbackQuery)
         {
             //await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
@@ -480,7 +637,7 @@ namespace aTTagirl
                     // first row
                     new []
                     {
-                        InlineKeyboardButton.WithCallbackData(text: "Очистить статистику", callbackData: "ClearPlayer")
+                        InlineKeyboardButton.WithCallbackData(text: "Очистить статистику", callbackData: "AskClear")
                     },
                     // second row
                     new []
