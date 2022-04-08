@@ -60,10 +60,7 @@ namespace aTTagirl
         //    //return player;
         //}
         }
-        class Info
-        {
-            
-        }
+    
 
     }
 
