@@ -32,7 +32,7 @@ namespace aTTagirl
                 return scoreStat;
             }
         }        
-    private static string token  = "5234460777:AAGa_a6V2k42DtybJPbmUR1rO3VXD1_oKJ4";
+    private static string token  = "Token";
         private static TelegramBotClient Bot;
 
         public static async Task Main()
